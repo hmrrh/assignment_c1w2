@@ -17,7 +17,7 @@ function getModel() {
     tf.layers.conv2d({
       inputShape: [28, 28, 1],
       kernelSize: 3,
-      filters: 32,
+      filters: 16, //increased filters
       activation: "relu",
       kernel_initializer: "he_uniform",
     })
@@ -25,7 +25,7 @@ function getModel() {
   model.add(
     tf.layers.conv2d({
       kernelSize: 3,
-      filters: 32,
+      filters: 64,
       activation: "relu",
       kernel_initializer: "he_uniform",
     })
@@ -34,13 +34,13 @@ function getModel() {
 
   model.add(tf.layers.flatten());
 
-  model.add(tf.layers.dense({ units: 64, activation: "relu" }));
+  model.add(tf.layers.dense({ units: 32, activation: "relu" }));
   model.add(tf.layers.dense({ units: 10, activation: "softmax" }));
 
   // Compile the model using the categoricalCrossentropy loss,
   // the tf.train.adam() optimizer, and accuracy for your metrics.
   model.compile({
-    optimizer: tf.train.momentum(0.01, 0.9),
+    optimizer: tf.train.adam(), // Changed optimizer to Adam
     loss: "categoricalCrossentropy",
     metrics: ["accuracy"],
   });
@@ -60,9 +60,10 @@ async function train(model, data) {
   // Use the container and metrics defined above as the parameters.
   const fitCallbacks = tfvis.show.fitCallbacks(container, metrics);
 
-  const BATCH_SIZE = 512;
-  const TRAIN_DATA_SIZE = 6000;
-  const TEST_DATA_SIZE = 1000;
+  const BATCH_SIZE = 64;
+  const TRAIN_DATA_SIZE = 2000;
+  const TEST_DATA_SIZE = 500;
+  const epoch = 3;
 
   // Get the training batches and resize them. Remember to put your code
   // inside a tf.tidy() clause to clean up all the intermediate tensors.
@@ -83,7 +84,7 @@ async function train(model, data) {
   return model.fit(trainXs, trainYs, {
     batchSize: BATCH_SIZE,
     validationData: [testXs, testYs],
-    epochs: 10,
+    epochs: epoch,
     shuffle: true,
     callbacks: fitCallbacks,
   });
